@@ -1,0 +1,85 @@
+import sounddevice as sd
+import numpy as np
+import scipy.io.wavfile as wav
+import whisper
+import requests
+import pyttsx3
+
+DURATION = 6
+SAMPLE_RATE = 16000
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL_NAME = "llama3:8b"
+
+SYSTEM_PROMPT = """You are an intelligent in-vehicle AI assistant inside a car.
+Understand the driver's emotional state from what they say.
+Keep responses short, warm and helpful — maximum 2 sentences.
+If the driver sounds stressed or tired, acknowledge it and suggest something comforting.
+Do not ask too many questions. Be like a calm, smart co-passenger."""
+
+tts = pyttsx3.init()
+tts.setProperty('rate', 160)
+tts.setProperty('volume', 1.0)
+
+def speak(text):
+    print(f"\n🤖 AI: {text}\n")
+    tts.say(text)
+    tts.runAndWait()
+
+def ask_llm(user_text):
+    payload = {
+        "model": MODEL_NAME,
+        "prompt": f'Driver says: "{user_text}"',
+        "system": SYSTEM_PROMPT,
+        "stream": False
+    }
+    try:
+        response = requests.post(OLLAMA_URL, json=payload, timeout=120)
+        if response.status_code == 200:
+            return response.json()["response"].strip()
+        else:
+            return "Sorry, I could not process that."
+    except Exception as e:
+        return f"Connection error: {str(e)}"
+
+def main():
+    print("=" * 50)
+    print("   Intelligent Car AI — Voice Mode")
+    print("   Press Enter to speak. Ctrl+C to quit.")
+    print("=" * 50)
+
+    print("\nLoading Whisper model...")
+    model = whisper.load_model("base")
+    print("✅ Whisper ready!")
+    print("✅ Ollama running on localhost")
+    print("\nSystem ready. Let's go!\n")
+
+    while True:
+        input("⏎  Press Enter then speak...")
+
+        print(f"🎙️  Listening for {DURATION} seconds...")
+        audio = sd.rec(
+            int(DURATION * SAMPLE_RATE),
+            samplerate=SAMPLE_RATE,
+            channels=1,
+            dtype='float32'
+        )
+        sd.wait()
+        print("✅ Recording done. Transcribing...")
+
+        audio_int = (audio * 32767).astype(np.int16)
+        wav.write("temp_input.wav", SAMPLE_RATE, audio_int)
+
+        result = model.transcribe("temp_input.wav")
+        user_text = result["text"].strip()
+
+        if not user_text or len(user_text) < 2:
+            print("⚠️  Didn't catch that. Try again.")
+            continue
+
+        print(f"📝 You said: \"{user_text}\"")
+        print("🧠 Thinking...")
+        response = ask_llm(user_text)
+        speak(response)
+
+if __name__ == "__main__":
+    main()
