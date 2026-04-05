@@ -1,6 +1,9 @@
 import asyncio
 import os
+import sys
 import tempfile
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 import edge_tts
 import numpy as np
@@ -35,10 +38,15 @@ async def speak(text):
     pygame.mixer.init()
     pygame.mixer.music.load(tmp_path)
     pygame.mixer.music.play()
+    await asyncio.sleep(0.1)  # wait for playback to actually start
     while pygame.mixer.music.get_busy():
         await asyncio.sleep(0.05)
+    pygame.mixer.music.unload()
     pygame.mixer.quit()
-    os.unlink(tmp_path)
+    try:
+        os.unlink(tmp_path)
+    except OSError:
+        pass
 
 
 def ask_llm(user_text):
