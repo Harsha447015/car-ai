@@ -1,22 +1,22 @@
-# \# Intelligent Car Infotainment and Control
+ Intelligent Car Infotainment and Control
 
-# 
 
-# A proactive, multimodal, LLM-based in-vehicle AI assistant that infers 
 
-# emotional state from natural speech and responds intelligently.
+ A proactive, multimodal, LLM-based in-vehicle AI assistant that infers 
 
-# 
+ emotional state from natural speech and responds intelligently.
 
-# \## Stack
 
-# \- Speech to Text: OpenAI Whisper (local)
 
-# \- LLM: Llama 3 8B via Ollama (local, no internet)
+ Stack
 
-# \- Text to Speech: pyttsx3
+ Speech to Text: OpenAI Whisper (local)
 
-# 
+ LLM: Llama 3 8B via Ollama (local, no internet)
+
+ Text to Speech: pyttsx3
+
+
 
 # \## How to Run
 
