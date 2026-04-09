@@ -128,4 +128,4 @@ The BE6's MAIA/Snapdragon stack is not touched. We interact only through the sta
 
 ---
 
-*Prepared for Venkat Sir · B.Tech Mechatronics & Robotics · Mahindra University, Hyderabad*
+
