@@ -455,12 +455,19 @@ def build_prompt(user_text: str, emotion: str, intent: str, manual_context: str)
     elif intent == "technical_query" and not manual_context:
         parts.append("\nNo manual excerpt found. Answer from general Mahindra BE6 knowledge.")
 
-    if intent in ("emotional", "emotional_action", "conversational", "mixed"):
-        if intent not in ("technical_query",):
-            parts.append(
-                "\nThis is an emotional/conversational moment — do NOT reference the manual. "
-                "Focus on the driver's emotional state, take caring proactive actions, and respond warmly."
-            )
+    if intent == "mixed":
+        parts.append(
+            "\nThe driver is BOTH emotional AND asking a technical question. You MUST do both:"
+            "\n1. Acknowledge their emotion and take comforting vehicle actions (lighting, music, climate)"
+            "\n2. ALSO answer the technical part using the manual excerpt above — explain what the warning"
+            " light or issue means, and what they should do about it."
+            "\nYour spoken_response should cover BOTH: comfort + the technical answer. You may use 2-3 sentences for mixed."
+        )
+    elif intent in ("emotional", "emotional_action", "conversational"):
+        parts.append(
+            "\nThis is an emotional/conversational moment — do NOT reference the manual. "
+            "Focus on the driver's emotional state, take caring proactive actions, and respond warmly."
+        )
 
     parts.append("\nReturn only the JSON object.")
     return "\n".join(parts)
