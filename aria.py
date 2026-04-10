@@ -23,6 +23,7 @@ DURATION            = 10
 SAMPLE_RATE         = 16000
 OLLAMA_URL          = "http://localhost:11434/api/generate"
 MODEL_NAME          = "llama3:8b"
+LLM_TIMEOUT         = 300  # seconds — Llama 3 8B can be slow on 6GB VRAM
 DB_PATH             = r"C:\car_ai\be6_database"
 TTS_VOICE           = "en-US-AriaNeural"
 CONVERSATION_MEMORY = 4   # turns to keep in context
@@ -149,119 +150,22 @@ WARNING LIGHT / DIAGNOSTIC QUESTION:
     driver to reduce speed and visit a Mahindra Authorised Dealer, or call Roadside
     Assistance at 1800 266 7070.
 
-EXAMPLES — study these carefully:
+EXAMPLES:
 
 Driver: "I had the worst day, I'm completely drained"
-{
-  "spoken_response": "I'm sorry — that sounds brutal. I've warmed the cabin up and put on something soft. Let's just get you home.",
-  "actions": [
-    {"system": "navigation", "command": "set_destination", "value": "home"},
-    {"system": "sunroof", "command": "close", "value": ""},
-    {"system": "climate", "command": "set_temperature", "value": "23"},
-    {"system": "ambient", "command": "set_lighting", "value": "warm_amber_dim"},
-    {"system": "media", "command": "play_playlist", "value": "lo_fi_calm"},
-    {"system": "display", "command": "set_brightness", "value": "30"},
-    {"system": "seat", "command": "lumbar_support", "value": "on"}
-  ],
-  "emotion_detected": "tired",
-  "emotion_acknowledged": true
-}
-
-Driver: "Today was so stressful, way too much happened"
-{
-  "spoken_response": "That sounds like a lot to carry — I've let some fresh air in and switched to something calming. We're heading home.",
-  "actions": [
-    {"system": "navigation", "command": "set_destination", "value": "home"},
-    {"system": "ventilation", "command": "set_mode", "value": "fresh_air"},
-    {"system": "climate", "command": "set_temperature", "value": "21"},
-    {"system": "ambient", "command": "set_lighting", "value": "soft_cool_blue"},
-    {"system": "media", "command": "play_playlist", "value": "ambient_nature"},
-    {"system": "display", "command": "set_brightness", "value": "35"},
-    {"system": "seat", "command": "ventilation", "value": "low"}
-  ],
-  "emotion_detected": "stressed",
-  "emotion_acknowledged": true
-}
-
-Driver: "I'm feeling really sad"
-{
-  "spoken_response": "Hey, I'm here with you. I've made things a bit cosier — warmer light, something gentle on.",
-  "actions": [
-    {"system": "ambient", "command": "set_lighting", "value": "warm_cosy"},
-    {"system": "climate", "command": "set_temperature", "value": "23"},
-    {"system": "media", "command": "play_playlist", "value": "feel_good_gentle"},
-    {"system": "sunroof", "command": "open", "value": "partial"}
-  ],
-  "emotion_detected": "sad",
-  "emotion_acknowledged": true
-}
-
-Driver: "I'm so angry right now, everything went wrong today"
-{
-  "spoken_response": "That's genuinely rough — I've opened the vents for some fresh air and put on something calming. Take a breath.",
-  "actions": [
-    {"system": "ventilation", "command": "set_mode", "value": "max_fresh"},
-    {"system": "climate", "command": "set_temperature", "value": "20"},
-    {"system": "ambient", "command": "set_lighting", "value": "soft_cool_calm"},
-    {"system": "media", "command": "play_playlist", "value": "calming_instrumental"},
-    {"system": "display", "command": "set_brightness", "value": "40"}
-  ],
-  "emotion_detected": "angry",
-  "emotion_acknowledged": true
-}
+{"spoken_response": "I'm sorry — that sounds brutal. I've warmed the cabin up and put on something soft. Let's just get you home.", "actions": [{"system": "navigation", "command": "set_destination", "value": "home"}, {"system": "sunroof", "command": "close", "value": ""}, {"system": "climate", "command": "set_temperature", "value": "23"}, {"system": "ambient", "command": "set_lighting", "value": "warm_amber_dim"}, {"system": "media", "command": "play_playlist", "value": "lo_fi_calm"}, {"system": "display", "command": "set_brightness", "value": "30"}, {"system": "seat", "command": "lumbar_support", "value": "on"}], "emotion_detected": "tired", "emotion_acknowledged": true}
 
 Driver: "How long does it take to charge?"
-{
-  "spoken_response": "On a DC fast charger, you're at 80 percent in around 20 minutes. A full home charge takes about 6 to 8 hours.",
-  "actions": [],
-  "emotion_detected": "neutral",
-  "emotion_acknowledged": false
-}
+{"spoken_response": "On a DC fast charger, you're at 80 percent in around 20 minutes. A full home charge takes about 6 to 8 hours.", "actions": [], "emotion_detected": "neutral", "emotion_acknowledged": false}
 
 Driver: "Play some jazz"
-{
-  "spoken_response": "Jazz it is — enjoy the ride.",
-  "actions": [
-    {"system": "media", "command": "play_playlist", "value": "jazz"}
-  ],
-  "emotion_detected": "neutral",
-  "emotion_acknowledged": false
-}
+{"spoken_response": "Jazz it is — enjoy the ride.", "actions": [{"system": "media", "command": "play_playlist", "value": "jazz"}], "emotion_detected": "neutral", "emotion_acknowledged": false}
 
-Driver: "I'm feeling a bit anxious, I've got a big meeting tomorrow"
-{
-  "spoken_response": "You've got this — I've put on something gentle and brought in some fresh air to help you decompress.",
-  "actions": [
-    {"system": "ventilation", "command": "set_mode", "value": "fresh_air"},
-    {"system": "climate", "command": "set_temperature", "value": "22"},
-    {"system": "ambient", "command": "set_lighting", "value": "soft_warm_white"},
-    {"system": "media", "command": "play_playlist", "value": "gentle_classical"},
-    {"system": "display", "command": "set_brightness", "value": "45"}
-  ],
-  "emotion_detected": "anxious",
-  "emotion_acknowledged": true
-}
-
-Driver: "My engine lights are blinking" (vague — does not specify which light or where)
-{
-  "spoken_response": "There are a few different lights on the BE6 — is it on your dashboard inside the car, on the charge port at the back, or on the charger unit? And what color is it — red, amber, or white? That'll help me tell you exactly what's going on.",
-  "actions": [],
-  "emotion_detected": "neutral",
-  "emotion_acknowledged": false
-}
+Driver: "My engine lights are blinking" (vague — does not specify which light)
+{"spoken_response": "There are a few different lights on the BE6 — is it on your dashboard inside the car, on the charge port at the back, or on the charger unit? And what color is it — red, amber, or white?", "actions": [], "emotion_detected": "neutral", "emotion_acknowledged": false}
 
 Driver: "I'm tired and there's a red warning light on my dashboard"
-{
-  "spoken_response": "I'm sorry you're feeling tired — I've made the cabin cosier for you. That red warning light means something needs attention. Please reduce your speed and head to a Mahindra dealer as soon as you can, or call Roadside Assistance at 1800 266 7070.",
-  "actions": [
-    {"system": "navigation", "command": "set_destination", "value": "nearest_mahindra_dealer"},
-    {"system": "climate", "command": "set_temperature", "value": "23"},
-    {"system": "ambient", "command": "set_lighting", "value": "warm_amber_dim"},
-    {"system": "media", "command": "play_playlist", "value": "lo_fi_calm"}
-  ],
-  "emotion_detected": "tired",
-  "emotion_acknowledged": true
-}
+{"spoken_response": "I'm sorry you're feeling tired — I've made the cabin cosier for you. That red warning light means something needs attention. Please reduce your speed and head to a Mahindra dealer, or call Roadside Assistance at 1800 266 7070.", "actions": [{"system": "navigation", "command": "set_destination", "value": "nearest_mahindra_dealer"}, {"system": "climate", "command": "set_temperature", "value": "23"}, {"system": "ambient", "command": "set_lighting", "value": "warm_amber_dim"}, {"system": "media", "command": "play_playlist", "value": "lo_fi_calm"}], "emotion_detected": "tired", "emotion_acknowledged": true}
 
 Return ONLY the JSON object. Nothing before it. Nothing after it."""
 
@@ -309,7 +213,7 @@ def load_rag_database():
         return None
 
 
-def search_manual(collection, question: str, n_results: int = 3) -> str:
+def search_manual(collection, question: str, n_results: int = 2) -> str:
     if not collection:
         return ""
     try:
@@ -317,7 +221,7 @@ def search_manual(collection, question: str, n_results: int = 3) -> str:
         context = ""
         for i, doc in enumerate(results["documents"][0]):
             page = results["metadatas"][0][i].get("page", "?")
-            context += f"[Page {page}]: {doc[:800]}\n\n"
+            context += f"[Page {page}]: {doc[:600]}\n\n"
         return context
     except Exception:
         return ""
@@ -524,7 +428,7 @@ def ask_llm(prompt: str) -> str | None:
         "stream": False,
     }
     try:
-        r = requests.post(OLLAMA_URL, json=payload, timeout=120)
+        r = requests.post(OLLAMA_URL, json=payload, timeout=LLM_TIMEOUT)
         if r.status_code == 200:
             return r.json()["response"].strip()
         return None
