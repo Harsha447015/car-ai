@@ -267,7 +267,7 @@ def load_rag_database():
         return None
 
 
-def search_manual(collection, question: str, n_results: int = 2) -> str:
+def search_manual(collection, question: str, n_results: int = 3) -> str:
     if not collection:
         return ""
     try:
@@ -275,7 +275,7 @@ def search_manual(collection, question: str, n_results: int = 2) -> str:
         context = ""
         for i, doc in enumerate(results["documents"][0]):
             page = results["metadatas"][0][i].get("page", "?")
-            context += f"[Page {page}]: {doc[:500]}\n"
+            context += f"[Page {page}]: {doc[:800]}\n\n"
         return context
     except Exception:
         return ""
@@ -294,12 +294,44 @@ def classify_intent(text: str) -> str:
         "too much", "fed up", "burned out", "can't take", "panic",
     ]
     technical_kw = [
-        "how to", "how do", "how long", "how much", "what is", "what's", "what are",
-        "where is", "charge", "charging", "battery", "range", "boost mode", "zip mode",
-        "drive mode", "tire pressure", "tyre", "warranty", "service", "maintenance",
-        "feature", "adas", "trunk", "sunroof how", "bluetooth how", "pair",
-        "specification", "specs", "horsepower", "torque", "dimensions", "weight",
-        "ground clearance", "infotainment", "software update", "regenerative",
+        # Question words (including Whisper mis-transcriptions without apostrophes)
+        "how to", "how do", "how long", "how much",
+        "what is", "what's", "whats", "what are", "what does", "what do",
+        "where is", "wheres", "where's",
+        "why is", "why does", "why do", "why are",
+        "can i", "can you", "is there", "does it", "does the", "should i",
+        # Car diagnostics — warning lights, faults, errors
+        "warning", "light", "blinking", "flashing", "indicator", "dashboard",
+        "engine light", "check engine", "malfunction",
+        "error", "fault", "issue", "problem", "wrong",
+        "alert", "notification", "beeping", "beep",
+        "not working", "broken", "stuck", "wont", "won't", "doesnt", "doesn't",
+        "failed", "failure",
+        # Vehicle systems
+        "engine", "motor", "brake", "abs", "airbag", "seatbelt",
+        "headlight", "taillight", "fog light", "turn signal",
+        "wiper", "washer", "coolant", "overheat", "temperature warning",
+        "oil", "fluid", "transmission", "steering",
+        # EV / charging
+        "charge", "charging", "battery", "range", "regenerative",
+        "plug", "charger", "fast charge", "dc charge",
+        # Drive modes
+        "boost mode", "zip mode", "drive mode", "eco mode", "sport mode",
+        # Tyres / pressure
+        "tire pressure", "tyre pressure", "tyre", "tpms", "psi",
+        # Service / warranty
+        "warranty", "service", "maintenance", "schedule",
+        # Features / ADAS
+        "feature", "adas", "collision", "lane", "cruise control",
+        "parking sensor", "reverse camera",
+        "trunk", "boot", "sunroof how", "bluetooth how", "pair", "connect how",
+        # Specs
+        "specification", "specs", "horsepower", "torque", "power output",
+        "dimensions", "weight", "ground clearance", "wheelbase",
+        "infotainment", "software update",
+        # Safety
+        "safety", "emergency", "sos", "roadside", "tow",
+        "child lock", "door lock", "key fob", "remote",
     ]
     action_kw = [
         "go home", "take me", "navigate", "drive to", "play", "put on", "turn on",
@@ -321,6 +353,17 @@ def classify_intent(text: str) -> str:
         return "technical_query"
     if has_action:
         return "action_request"
+
+    # Fallback: if it looks like a question (has "?" or starts with a question word)
+    # and isn't emotional, treat it as technical so RAG is consulted
+    question_starters = [
+        "what", "why", "how", "where", "when", "which", "does",
+        "is the", "is my", "is it", "can i", "can the", "should",
+        "will", "do i", "do the", "are the", "are there",
+    ]
+    if "?" in t or any(t.strip().startswith(qs) for qs in question_starters):
+        return "technical_query"
+
     return "conversational"
 
 
