@@ -7,6 +7,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 import edge_tts
 import numpy as np
+
 import pygame
 import requests
 import scipy.io.wavfile as wav
