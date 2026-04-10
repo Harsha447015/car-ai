@@ -545,7 +545,7 @@ async def main() -> None:
     while True:
         try:
             input("⏎  Press Enter then speak...")
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError):
             print("\n\n👋 Goodbye. Drive safe.")
             break
 
