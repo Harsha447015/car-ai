@@ -1,0 +1,87 @@
+## BE6 Manual Supplement — Content from image-only pages and compiled references
+## This file is ingested by be6_rag.py alongside the PDF to fill knowledge gaps
+## where the manual uses images/icons instead of searchable text.
+
+=== SECTION: Dashboard Telltale / Warning Lights Overview (Manual Page 66 — image only) ===
+
+The Mahindra BE6 Driver Information Display (instrument cluster) shows telltale warning lights.
+Telltale lights are grouped into slots and cycle based on their active status.
+
+IMPORTANT: The Mahindra BE6 is a fully electric vehicle. It has NO combustion engine.
+There is no traditional "check engine" light. What drivers may call an "engine light" is
+actually a powertrain/motor warning indicator or another system fault telltale.
+
+General rules for ALL dashboard telltale warning lights on the BE6:
+- At ignition (vehicle start): All telltale lights briefly illuminate for a self-check. They should go out within a few seconds. This is normal.
+- If any warning light stays ON or starts BLINKING while driving: This indicates a system fault. The vehicle needs inspection.
+- Red warning light: Serious or critical fault. Stop driving as soon as it is safe. Contact Mahindra Roadside Assistance at 1800 266 7070.
+- Amber/Yellow warning light: Non-critical fault. Get the vehicle inspected soon. Book a service at a Mahindra Authorised Dealer.
+- Green/Blue indicator light: Informational only (e.g., turn signal active, high beam on). Not a fault.
+
+If a driver reports a blinking or illuminated warning light on the dashboard, do NOT guess what it means. Instead:
+1. Ask which color the light is (red, amber/yellow, green, blue, white)
+2. Ask if it is on the dashboard inside the car, on the charge port at the rear, or on the wall charger unit
+3. Advise based on color: red = stop driving soon, amber = get it checked, green/blue = informational
+
+=== SECTION: ABS Warning Light (Manual Page 72) ===
+
+The ABS (Anti-lock Brake System) warning lamp lights up when you switch ON the ignition and should go out after a few seconds as part of the normal self-check.
+If the ABS warning lamp does NOT go out after ignition, or if it comes ON while driving, it means there is a fault in the ABS system.
+Action required: Visit a Mahindra Authorised Dealer for inspection immediately. Do not ignore an ABS warning light.
+
+=== SECTION: Complete Blinking Light Reference — All Types on the BE6 ===
+
+There are FOUR different locations where lights can blink on the Mahindra BE6. When a driver says "lights are blinking" you MUST ask which one they mean:
+
+--- 1. EXTERIOR / HAZARD LAMPS (outside the car, turn signal lamps) ---
+- Hazard lamps flash ONCE: All doors locked and armed successfully via key fob. Normal.
+- Hazard lamps flash TWICE: Vehicle unlocked — no theft detected while car was locked. Normal.
+- Hazard lamps flash FOUR TIMES + alarm horn: Theft attempt detected while car was locked. Check vehicle.
+- Hazard lamps flash FIVE TIMES + alarm horn: A door or bonnet was open when you tried to lock. Close all doors and try again.
+- All turn signal lamps flashing continuously: Hazard warning lamp is switched ON (emergency mode). The switch is on the roof console.
+- Hazard lamps flash automatically during panic braking: Normal safety feature to warn following traffic. Lasts about 10 seconds.
+- Hazard lamps turn on automatically when bonnet is open and vehicle is stationary: Normal safety feature.
+- Hazard lamps turn on for 30 minutes after airbag deployment in an accident: Can be turned off manually via the hazard switch.
+
+--- 2. CHARGE PORT LED (small LED on the rear-left charge flap of the car) ---
+- White (steady ON): Battery status indication. Normal.
+- Red (BLINKING): CHARGE ERROR — something is wrong with the charging connection or system. Disconnect and reconnect the charger. If it persists, contact service.
+- Amber (BLINKING): GUN STUCK — the charging plug is locked and will not release. Do not force it. Contact service.
+- Green (animation/pulsing): Charging in progress. Normal.
+
+--- 3. EVSE WALL CHARGER LED (light on the portable 3kW charger unit, NOT on the car) ---
+- White (steady ON): Charger is ready / battery status.
+- White (BLINKING): System Verification — the charger is performing its startup check. Wait for it to complete.
+- Blue (BLINKING): Scheduled charging — the car is set to charge at a later time.
+- Red (steady ON): Low battery, State of Charge below 10%.
+- Red (BLINKING): Charge Error on the charger side.
+- Amber (BLINKING): Gun Stuck on the charger side.
+
+--- 4. DASHBOARD TELLTALE LIGHTS (inside the car, instrument cluster) ---
+- Any warning light ON at ignition that goes out in a few seconds: Normal self-check.
+- Any warning light that STAYS ON or BLINKS while driving: System fault detected. Requires inspection.
+- Red telltale while driving: CRITICAL — stop driving as soon as safe, call Mahindra RSA at 1800 266 7070.
+- Amber/Yellow telltale while driving: NON-CRITICAL — schedule service soon at a Mahindra Authorised Dealer.
+- ABS warning light stays on or comes on while driving: Fault in the ABS system. Visit dealer immediately.
+
+=== SECTION: What to do when you see a warning light ===
+
+When any warning light appears on the dashboard while driving the BE6:
+1. Do NOT panic. Reduce speed gradually.
+2. Avoid hard acceleration or aggressive driving.
+3. If the light is RED: Pull over safely as soon as possible. Do not continue driving.
+4. If the light is AMBER/YELLOW: You can continue driving carefully to your destination or a service center.
+5. Contact Mahindra Roadside Assistance: 1800 266 7070 (toll-free, 24/7).
+6. Visit a Mahindra Authorised Dealer for diagnosis and repair.
+7. Do NOT attempt to reset warning lights yourself — they indicate real faults that need professional inspection.
+
+=== SECTION: Mahindra BE6 is an Electric Vehicle — No Engine ===
+
+The Mahindra BE6 is a Battery Electric Vehicle (BEV). It does NOT have a petrol or diesel engine.
+It is powered by an electric motor and a lithium-ion battery pack.
+Therefore, there is no "check engine light" in the traditional sense.
+When a driver refers to an "engine light," they likely mean one of:
+- A powertrain/motor fault indicator on the dashboard
+- A battery management system warning
+- A general system fault telltale
+The correct response is to ask the driver what color the light is and where it appears (dashboard, charge port, or charger unit).

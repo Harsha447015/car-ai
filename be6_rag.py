@@ -23,8 +23,9 @@ import fitz  # PyMuPDF
 from chromadb.utils import embedding_functions
 
 # ── Settings ──────────────────────────────────────────────────────────────────
-PDF_PATH = r"C:\car_ai\Vehicle Manual_BE6_compressed.pdf"
-DB_PATH  = r"C:\car_ai\be6_database"
+PDF_PATH        = r"C:\car_ai\Vehicle Manual_BE6_compressed.pdf"
+SUPPLEMENT_PATH = r"C:\car_ai\be6_manual_supplement.txt"
+DB_PATH         = r"C:\car_ai\be6_database"
 
 CHUNK_SIZE    = 400   # characters per chunk (fits within 256 tokens)
 CHUNK_OVERLAP = 100   # overlap between consecutive chunks
@@ -112,6 +113,50 @@ def read_and_chunk_pdf(pdf_path: str) -> list[dict]:
     return all_chunks
 
 
+# ── Read supplement file ──────────────────────────────────────────────────────
+def read_and_chunk_supplement(supplement_path: str) -> list[dict]:
+    """Read the manually-curated supplement file that fills gaps from image-only
+    PDF pages (e.g. telltale icons, compiled warning light reference)."""
+    if not os.path.exists(supplement_path):
+        print("⚠️  No supplement file found — skipping")
+        return []
+
+    print("📖 Reading manual supplement...")
+    with open(supplement_path, "r", encoding="utf-8") as f:
+        full_text = f.read()
+
+    # Split on section headers (=== SECTION: ... ===)
+    sections = re.split(r'===\s*SECTION:\s*', full_text)
+    all_chunks = []
+    global_idx = 0  # unique index across all supplement chunks
+
+    for section in sections:
+        section = section.strip()
+        if not section or section.startswith("##"):
+            continue
+
+        # Extract section title from first line
+        lines = section.split("\n", 1)
+        title = lines[0].rstrip(" =").strip()
+        body = lines[1].strip() if len(lines) > 1 else ""
+
+        if len(body) < 30:
+            continue
+
+        # Chunk the section body
+        chunks = chunk_text(body)
+        for chunk in chunks:
+            all_chunks.append({
+                "text": f"{title}\n\n{chunk}",
+                "page": "supplement",
+                "chunk_index": global_idx,
+            })
+            global_idx += 1
+
+    print(f"✅ Extracted {len(all_chunks)} chunks from supplement")
+    return all_chunks
+
+
 # ── Build ChromaDB ────────────────────────────────────────────────────────────
 def build_database(chunks: list[dict]) -> chromadb.Collection:
     print("🗄️  Building searchable database...")
@@ -137,7 +182,7 @@ def build_database(chunks: list[dict]) -> chromadb.Collection:
         collection.add(
             documents=[c["text"] for c in batch],
             ids=[f"p{c['page']}_c{c['chunk_index']}" for c in batch],
-            metadatas=[{"page": c["page"], "chunk": c["chunk_index"]} for c in batch],
+            metadatas=[{"page": str(c["page"]), "chunk": c["chunk_index"]} for c in batch],
         )
         print(f"   Added {min(i + batch_size, len(chunks))}/{len(chunks)} chunks")
 
@@ -190,10 +235,19 @@ def main():
         sys.exit(1)
 
     chunks = read_and_chunk_pdf(PDF_PATH)
+
+    # Also ingest the supplement file (fills image-only gaps in the PDF)
+    supplement_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  "be6_manual_supplement.txt")
+    if not os.path.exists(supplement_file):
+        supplement_file = SUPPLEMENT_PATH
+    supplement_chunks = read_and_chunk_supplement(supplement_file)
+    chunks.extend(supplement_chunks)
+
     collection = build_database(chunks)
 
     print(f"\n✅ Done! Database saved to: {DB_PATH}")
-    print(f"   Total chunks: {collection.count()}")
+    print(f"   Total chunks: {collection.count()} ({len(supplement_chunks)} from supplement)")
     print(f"   Chunk size: ~{CHUNK_SIZE} chars with {CHUNK_OVERLAP} char overlap")
 
     if args.test:
