@@ -125,9 +125,17 @@ TECHNICAL QUESTION (charging, range, specs, features, how to, what is, where is)
   actions: []
   Answer directly and concisely from the manual context if provided.
   Never invent specific numbers you don't know — say "let me check" if unsure.
+  Do NOT add emotional comfort actions (music, lighting, dimming) for neutral/calm technical questions.
+  Only add actions if they are directly relevant to the question (e.g. navigation for a trip question).
 
 DIRECT REQUEST (navigate, play, call, set temperature, open/close something):
   Execute exactly what was asked. Keep spoken_response to 1 sentence.
+
+NAVIGATION RULE:
+  ONLY set navigation to "home" if the driver explicitly says "home", "take me home", or "go home."
+  If the driver says "I want to go to a place" or mentions a destination that is NOT home,
+  do NOT default to "home." Instead either use the destination they mentioned, or ask where
+  they'd like to go. Never assume the destination is home.
 
 WARNING LIGHT / DIAGNOSTIC QUESTION:
   CRITICAL RULE: The Mahindra BE6 is a fully ELECTRIC vehicle — it has NO combustion engine.
@@ -288,6 +296,12 @@ def classify_intent(text: str) -> str:
         "red", "amber", "yellow", "green", "blue", "white",
         # CID vs DID
         "infotainment", "touchscreen", "instrument cluster", "cid", "did",
+        # Range / distance / trip planning
+        "kilometer", "kilometres", "km", "miles",
+        "how far", "make it", "reach", "will my car",
+        "battery cycle", "charge cycle", "how many charge",
+        "trip", "long drive", "road trip", "distance",
+        "enough range", "enough battery", "enough charge",
     ]
     action_kw = [
         "go home", "take me", "navigate", "drive to", "play", "put on", "turn on",
@@ -463,6 +477,9 @@ def ask_llm(prompt: str) -> str | None:
         "prompt": prompt,
         "system": SYSTEM_PROMPT,
         "stream": False,
+        "options": {
+            "num_predict": 1024,   # ensure response isn't truncated
+        },
     }
     try:
         r = requests.post(OLLAMA_URL, json=payload, timeout=LLM_TIMEOUT)
@@ -485,9 +502,21 @@ def parse_response(raw: str | None) -> dict | None:
     match = re.search(r'\{.*\}', cleaned, re.DOTALL)
     if match:
         try:
-            return json.loads(match.group())
+            parsed = json.loads(match.group())
+            # Sanitize: if spoken_response starts with a JSON-like field name
+            # (e.g. "spoken_response : ..."), strip it — the LLM leaked raw JSON
+            sr = parsed.get("spoken_response", "")
+            if isinstance(sr, str):
+                sr = re.sub(r'^(spoken_response\s*:\s*)', '', sr, flags=re.IGNORECASE)
+                parsed["spoken_response"] = sr.strip()
+            return parsed
         except json.JSONDecodeError:
             pass
+
+    # Last resort: try to extract spoken_response even from broken JSON
+    sr_match = re.search(r'"spoken_response"\s*:\s*"((?:[^"\\]|\\.)*)"', cleaned)
+    if sr_match:
+        return {"spoken_response": sr_match.group(1), "actions": []}
     return None
 
 
