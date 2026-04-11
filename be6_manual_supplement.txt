@@ -75,6 +75,23 @@ When any warning light appears on the dashboard while driving the BE6:
 6. Visit a Mahindra Authorised Dealer for diagnosis and repair.
 7. Do NOT attempt to reset warning lights yourself — they indicate real faults that need professional inspection.
 
+=== SECTION: CID vs DID — Centre Information Display vs Driver Information Display ===
+
+The Mahindra BE6 has TWO screens:
+
+1. CID (Centre Information Display) — the large touchscreen in the center of the dashboard.
+   This is the INFOTAINMENT screen. It shows maps, music, settings, phone, apps.
+   WARNING LIGHTS DO NOT APPEAR ON THE CID. It is NOT a warning indicator.
+
+2. DID (Driver Information Display) — the instrument cluster screen directly behind the steering wheel.
+   This is where ALL telltale/warning lights appear (red, amber, green, blue indicators).
+   When a driver says "warning light on my dashboard," they mean the DID.
+
+Important distinction for diagnostics:
+- If a driver says "something is showing on my screen" → ask whether they mean the centre touchscreen (infotainment/CID) or the instrument cluster behind the steering wheel (DID).
+- Warning/fault telltales ONLY appear on the DID (instrument cluster).
+- The CID (touchscreen) may show notifications or alerts from the vehicle's software, but these are NOT the same as telltale warning lights.
+
 === SECTION: Mahindra BE6 is an Electric Vehicle — No Engine ===
 
 The Mahindra BE6 is a Battery Electric Vehicle (BEV). It does NOT have a petrol or diesel engine.

@@ -278,6 +278,16 @@ def classify_intent(text: str) -> str:
         # Safety
         "safety", "emergency", "sos", "roadside", "tow",
         "child lock", "door lock", "key fob", "remote",
+        # Follow-up / continuation phrases (driver answering a prior question)
+        "what can it be", "what could it be", "what are the possibilities",
+        "tell me more", "explain that", "what does that mean",
+        "what now", "what should i do", "what do i do",
+        "yes it is", "yes its", "yes it's", "it is on", "it's on", "its on",
+        "the dashboard", "on the dashboard", "on my dashboard",
+        "the charge port", "the charger", "on the charger",
+        "red", "amber", "yellow", "green", "blue", "white",
+        # CID vs DID
+        "infotainment", "touchscreen", "instrument cluster", "cid", "did",
     ]
     action_kw = [
         "go home", "take me", "navigate", "drive to", "play", "put on", "turn on",
@@ -288,6 +298,30 @@ def classify_intent(text: str) -> str:
     has_emotion = any(kw in t for kw in emotional_kw)
     has_tech    = any(kw in t for kw in technical_kw)
     has_action  = any(kw in t for kw in action_kw)
+
+    # ── Context-carry guard ───────────────────────────────────────
+    # If the last ARIA turn involved a safety/diagnostic topic and the
+    # conversation is still going, force the intent to stay technical
+    # so the safety thread is never dropped by a misheard word.
+    safety_carry_keywords = [
+        "warning light", "fault", "critical", "roadside assistance",
+        "1800 266 7070", "dealer", "reduce speed", "stop driving",
+        "dashboard", "telltale", "charge port", "charger unit",
+        "blinking", "red light", "amber light",
+    ]
+    safety_thread_active = False
+    if history:
+        last_aria = history[-1].get("aria", "").lower()
+        last_driver = history[-1].get("driver", "").lower()
+        if any(sk in last_aria or sk in last_driver for sk in safety_carry_keywords):
+            safety_thread_active = True
+
+    if safety_thread_active and not has_action:
+        # The previous turn was about a safety/diagnostic issue.
+        # Keep the intent as technical or mixed so RAG stays engaged.
+        if has_emotion:
+            return "mixed"
+        return "technical_query"
 
     if has_emotion and has_tech:
         return "mixed"
@@ -383,7 +417,10 @@ def build_prompt(user_text: str, emotion: str, intent: str, manual_context: str)
     parts = []
 
     if history:
-        parts.append("=== Recent conversation ===")
+        parts.append("=== CONVERSATION HISTORY (READ THIS FIRST) ===")
+        parts.append("IMPORTANT: If a prior turn shows the driver already answered a clarifying question,")
+        parts.append("DO NOT ask that same question again. Use the answer they already gave.")
+        parts.append("Build on what you already know from prior turns — never restart the conversation.\n")
         for turn in history:
             parts.append(f'Driver: "{turn["driver"]}"')
             parts.append(f'ARIA: "{turn["aria"]}"')
@@ -518,6 +555,46 @@ async def main() -> None:
         emotion = detect_emotion(user_text)
         intent  = classify_intent(user_text)
         print(f"   Emotion: {emotion}  |  Intent: {intent}")
+
+        # ── Critical safety shortcut (red + dashboard confirmed) ──
+        # Check the full conversation (including current turn) for
+        # confirmation that the driver has a RED warning on the DASHBOARD.
+        # If confirmed, bypass LLM/RAG and give a deterministic response.
+        all_text = " ".join(
+            t["driver"].lower() + " " + t["aria"].lower() for t in history
+        ) + " " + user_text.lower()
+
+        red_confirmed = any(p in all_text for p in [
+            "red", "red light", "red warning", "red blinking",
+        ])
+        dashboard_confirmed = any(p in all_text for p in [
+            "dashboard", "instrument cluster", "did", "inside the car",
+            "behind the steering", "on my dash",
+        ])
+
+        if red_confirmed and dashboard_confirmed:
+            print("   🚨 CRITICAL SAFETY PATH — red dashboard warning confirmed")
+            critical_response = (
+                "A red warning light on your dashboard while driving is critical. "
+                "Please reduce speed and pull over when it's safe. "
+                "This could be a general fault indicator, a 12V battery issue, "
+                "an EPB (electronic parking brake) fault, or a powertrain warning. "
+                "Do not restart the vehicle — head to the nearest Mahindra dealer "
+                "or call Roadside Assistance at 1800 266 7070."
+            )
+            critical_actions = [
+                {"system": "navigation", "command": "set_destination", "value": "nearest_mahindra_dealer"},
+                {"system": "ambient", "command": "set_lighting", "value": "alert_red_pulse"},
+                {"system": "display", "command": "set_brightness", "value": "100"},
+            ]
+            display_actions(critical_actions)
+            history.append({
+                "driver":  user_text,
+                "aria":    critical_response,
+                "emotion": emotion,
+            })
+            await speak(critical_response)
+            continue
 
         # ── Retrieve (only when needed) ───────────────────────────
         manual_context = ""
