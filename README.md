@@ -94,3 +94,5 @@ C:\Users\Harshavardhan\AppData\Roaming\Python\Python314\site-packages\whisper\tr
 🤖 ARIA: I'm so sorry you're feeling exhausted - I've made things cozy for you. Let's get you home.
 
 ⏎  Press Enter then speak...Traceback (most recent call last):
+
+
